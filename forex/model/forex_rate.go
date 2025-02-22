@@ -2,11 +2,10 @@ package model
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 )
 
-type ForexRate struct {
+type ForexRateResponse struct {
 	Timestamp       time.Time
 	BaseCurrency    string
 	CounterCurrency string
@@ -15,23 +14,25 @@ type ForexRate struct {
 	Spread          float32
 }
 
-func (f *ForexRate) UnmarshalJSON(data []byte) error {
-	type Alias ForexRate
+func (f *ForexRateResponse) UnmarshalJSON(data []byte) error {
+	type Alias ForexRateResponse
 	aux := &struct {
 		Timestamp string
 		*Alias
 	}{
 		Alias: (*Alias)(f),
 	}
-	if err := json.Unmarshal(data, &aux); err != nil {
+
+	var err error
+
+	if err = json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	var t, err = time.Parse("2006-01-02T15:04:05", aux.Timestamp)
+
+	f.Timestamp, err = time.Parse("2006-01-02T15:04:05", aux.Timestamp)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("timestamp in parser: %v\n", t)
-	f.Timestamp = t
 	return nil
 }
