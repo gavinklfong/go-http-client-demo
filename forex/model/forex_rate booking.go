@@ -49,3 +49,16 @@ func (f *ForexRateBookingResponse) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+func (f *ForexRateBookingResponse) MarshalJSON() ([]byte, error) {
+	type Alias ForexRateBookingResponse
+	return json.Marshal(&struct {
+		Timestamp  string `json:"timestamp"`
+		ExpiryTime string `json:"expiryTime"`
+		*Alias
+	}{
+		Timestamp:  f.Timestamp.Format("2006-01-02T15:04:05"),
+		ExpiryTime: f.ExpiryTime.Format("2006-01-02T15:04:05"),
+		Alias:      (*Alias)(f),
+	})
+}

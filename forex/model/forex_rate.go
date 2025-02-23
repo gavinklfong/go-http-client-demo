@@ -36,3 +36,14 @@ func (f *ForexRateResponse) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+func (f *ForexRateResponse) MarshalJSON() ([]byte, error) {
+	type Alias ForexRateResponse
+	return json.Marshal(&struct {
+		Timestamp string `json:"timestamp"`
+		*Alias
+	}{
+		Timestamp: f.Timestamp.Format("2006-01-02T15:04:05"),
+		Alias:     (*Alias)(f),
+	})
+}
