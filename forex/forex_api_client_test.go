@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/testcontainers/testcontainers-go"
@@ -64,11 +65,16 @@ func (suite *ForexApiClientTestSuite) TestGetLatestRates() {
 
 	// Use the WireMock client to stub a new endpoint manually
 
-	err := suite.wiremockContainer.Client.StubFor(
+	body, err := os.ReadFile("rates.json")
+	if err != nil {
+		suite.T().Fatalf("fail to read stub response from file: %s", err)
+	}
+
+	err = suite.wiremockContainer.Client.StubFor(
 		wiremock.Get(wiremock.URLEqualTo("/rates/latest")).
 			WillReturnResponse(
 				wiremock.NewResponse().
-					WithJSONBody(map[string]string{"result": "Hello, world!"}).
+					WithBody(string(body)).
 					WithHeader("Content-Type", "application/json").
 					WithStatus(http.StatusOK),
 			),
