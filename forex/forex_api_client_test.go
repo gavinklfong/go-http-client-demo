@@ -90,3 +90,33 @@ func (suite *ForexApiClientTestSuite) TestGetLatestRates() {
 
 	assert.NotNil(suite.T(), rates)
 }
+
+func (suite *ForexApiClientTestSuite) TestGetLatestRate() {
+
+	// Use the WireMock client to stub a new endpoint manually
+
+	body, err := os.ReadFile("rate.json")
+	if err != nil {
+		suite.T().Fatalf("fail to read stub response from file: %s", err)
+	}
+
+	err = suite.wiremockContainer.Client.StubFor(
+		wiremock.Get(wiremock.URLEqualTo("/rates/latest/AUD/USD")).
+			WillReturnResponse(
+				wiremock.NewResponse().
+					WithBody(string(body)).
+					WithHeader("Content-Type", "application/json").
+					WithStatus(http.StatusOK),
+			),
+	)
+	if err != nil {
+		suite.T().Fatal(err)
+	}
+
+	rate, err := suite.apiClient.GetLatestRate("AUD", "USD")
+	if err != nil {
+		suite.T().Fatal(err)
+	}
+
+	assert.NotNil(suite.T(), rate)
+}
